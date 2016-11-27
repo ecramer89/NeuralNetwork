@@ -16,6 +16,19 @@ public class Util {
 		return result;
 	}
 
+
+	/* shuffle the array values in place*/
+	public static void shuffle(Object[] input){
+		for(int i=0;i<input.length;i++){
+			//pick a random location to put it in 
+			int rand=(int)(Math.random()*(input.length-1));
+			Object temp=input[rand];
+			input[rand]=input[i];
+			input[i]=temp;
+		}
+
+	}
+
 	public static double sigmoid(double x) {
 		return 1/(1+Math.pow(Math.E, -x));
 	}

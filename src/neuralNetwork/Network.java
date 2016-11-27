@@ -1,7 +1,21 @@
 package neuralNetwork;
 
 
+/*
+ * uses online training. need to make it so we visit the inputs in a randomorder (not always the same or else
+ * it will always privelige the first input)
+ * 
+ * 
+ */
+
+
 public class Network {
+
+	private boolean test=true;
+	private double[][] testHiddenLayer =new double[][]{{.8, .4, .3},{.2,.9,.5}};
+	//expect updated weights: 0.712, .355, .268, .112, .855, .468
+	private double[] testOutputWeights =new double[]{.3, .5, .9};
+	//expect .116 .329 .708
 
 
 	//each neuron is one column in the matrix.
@@ -14,8 +28,10 @@ public class Network {
 	private double[][] rawHiddenLayerResults;
 	private double[] rawOutputLayerResults;
 	private double[] outputLayerResults;
+	private double[] errors;
 	private double[][] input;
 	private double[] expected; 
+	
 
 	public Network(NetworkParams params){
 		this(params.getNumHiddenUnits(), params.getNumInputDimensions());
@@ -26,12 +42,19 @@ public class Network {
 		hiddenLayer=new double[numInputDimensions][numHiddenUnits];
 		outputWeights=new double[numHiddenUnits];
 		//initialize rows; one row for each input dimension; each row has one entry per hidden unit (entries are weights)	
+      
+		if(test){
+			hiddenLayer=testHiddenLayer;
+			outputWeights=testOutputWeights;
+		} else{
+			setRandomInitialWeigths(numHiddenUnits);
+		}
 
-		hiddenLayer=new double[][]{{.8, .4, .3},{.2,.9,.5}};
+	}
 
-		outputWeights=new double[]{.3, .5, .9};
 
-		/*for(int i=0;i<hiddenLayer.length;i++){
+	private void setRandomInitialWeigths(int numHiddenUnits){
+		for(int i=0;i<hiddenLayer.length;i++){
 			hiddenLayer[i]=new double[numHiddenUnits];
 			//initialize random weights
 			for(int j=0;j<numHiddenUnits;j++){
@@ -42,10 +65,16 @@ public class Network {
 
 		for(int i=0;i<outputWeights.length;i++){
 			outputWeights[i]=Math.random();
-		}*/
-
+		}
 	}
 
+
+	
+	public void train(Input[] input){
+		
+	}
+	
+	
 
 	public void train(double[][] input, double[] expected){
 
@@ -53,7 +82,6 @@ public class Network {
 		normalizeInputs(input, expected);
 		saveInputs(input, expected);
 		forwardPropagate();
-
 		backPropagate();
 
 
@@ -64,16 +92,17 @@ public class Network {
 
 	private void backPropagate() {
 
+		System.out.println("Predictions: ");
+		Matrix.print(outputLayerResults);
+		System.out.println("Errors: ");
+		Matrix.print(errors);
+		
 		for(int i=0;i<hiddenLayerResults.length;i++){
 			double[] hiddenResultsForOneInput=hiddenLayerResults[i];
 			double output=outputLayerResults[i];
 			double rawOutput=rawOutputLayerResults[i];
-			double error=expected[i]-output;
-			
-			System.out.println("Prediction: "+output);
-			System.out.println("Error: "+error);
-			
-			
+			double error=errors[i];
+
 			double sigPrimeRawOutput=Util.sigmoidPrime(rawOutput);
 			//derivative of sigmoid times the error
 			double proposedDeltaOutput=error*sigPrimeRawOutput;
@@ -127,42 +156,63 @@ public class Network {
 			}
 
 		}
-		
-		
+
+
 		System.out.println("New output weights");
 		Matrix.print(outputWeights);
-        System.out.println("New input weights");
-        Matrix.print(hiddenLayer);
+		System.out.println("New input weights");
+		Matrix.print(hiddenLayer);
 	}
 
 
 	private void forwardPropagate() {
+		calculateHiddenOuputs();
+		calculateOutputs();
+	}
+
+
+	private void calculateHiddenOuputs(){
 		hiddenLayerResults=Matrix.multiply(input, hiddenLayer);
 		rawHiddenLayerResults=hiddenLayerResults.clone();
 		hiddenLayerResults=Util.sigmoid(hiddenLayerResults);
-		//each row in hiddenLayerResults represents the output of each neuron to a single input example.
+	}
+
+
+	private void calculateOutputs(){
 		rawOutputLayerResults=new double[input.length];
 		outputLayerResults=new double[input.length];
 
 		for(int i=0;i<hiddenLayerResults.length;i++){
 
-			double[] hiddenResultsForOneInput=hiddenLayerResults[i];
+			calculateOutput(i);
+			calculateError(i);
 
-			double outputsum=Matrix.dotProduct(hiddenResultsForOneInput, outputWeights);
-			rawOutputLayerResults[i]=outputsum;
-		
-			outputsum=Util.sigmoid(outputsum);
 
-			outputLayerResults[i]=outputsum;
-			
-			
 		}
+	}
+	
+	private void calculateOutput(int inputIndex){
+		double[] hiddenResultsForOneInput=hiddenLayerResults[inputIndex];
 
+		double outputsum=Matrix.dotProduct(hiddenResultsForOneInput, outputWeights);
+		rawOutputLayerResults[inputIndex]=outputsum;
+
+		outputsum=Util.sigmoid(outputsum);
+
+		outputLayerResults[inputIndex]=outputsum;
+	}
+	
+	
+	
+	private void calculateError(int inputIndex){
+		double output=outputLayerResults[inputIndex];
+		double error=expected[inputIndex]-output;
+		errors[inputIndex]=error;
 	}
 
 
 	private void normalizeInputs(double[][] input, double[] expected){
-	
+
 		for(int i=0;i<input.length;i++){
 			Util.normalize(input[i]);
 		}
@@ -171,9 +221,10 @@ public class Network {
 
 
 	private void saveInputs(double[][] input, double[] expected) {
-	
+
 		this.input=input;
 		this.expected=expected;
+		errors=new double[input.length];
 
 	}
 
