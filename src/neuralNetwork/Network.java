@@ -2,8 +2,6 @@ package neuralNetwork;
 
 
 /*
- * uses online training. need to make it so we visit the inputs in a randomorder (not always the same or else
- * it will always privelige the first input)
  * 
  * 
  */
@@ -69,12 +67,6 @@ public class Network {
 	}
 
 
-	
-	public void train(Input[] input){
-		
-	}
-	
-	
 
 	public void train(double[][] input, double[] expected){
 

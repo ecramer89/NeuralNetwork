@@ -1,4 +1,5 @@
 package neuralNetwork;
+import static neuralNetwork.Util.*;
 
 
 
@@ -16,24 +17,21 @@ public class Driver {
 	public static void main(String[] args) {
 
 	
-		double[][] inputs={{1,1}, {2,2}, {8, 9}, {1, 2}, {9, 3}, {1, 2}, {3, 6}};
-		double[] expected={0, 1};
+		double[][] trainingSet={{1,1}, {1,0}, {1,1}, {1,0}, {0,1}, {0,1}, {0,0}};
+		double[] expectedTrainingOutputs={123, 234,  340, 28, 55, 79, 120};
 		
 		
-		Util.shuffle(inputs);
-		Matrix.print(inputs);
-
-/*
 		NetworkParams params=new NetworkParams();
 		params.setNumHiddenUnits(3);
 		params.setNumInputDimensions(2);
 
 		Network n=new Network(params);
-		for(int i=0;i<100;i++){
+		for(int i=0;i<300;i++){
+			shuffle(trainingSet, expectedTrainingOutputs);
 			System.out.println("Training round: "+i);
-			n.train(inputs, expected);
+			n.train(trainingSet, expectedTrainingOutputs);
 			System.out.println();
-		}*/
+		}
 	}
 
 }

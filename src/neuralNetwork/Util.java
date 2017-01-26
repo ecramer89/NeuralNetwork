@@ -1,6 +1,6 @@
 package neuralNetwork;
 
-public class Util {
+public class Util<T> {
 
 	public static double[][] sigmoid(double[][] matrix){
 		double[][] result=new double[matrix.length][matrix[0].length];
@@ -18,16 +18,29 @@ public class Util {
 
 
 	/* shuffle the array values in place*/
-	public static void shuffle(Object[] input){
-		for(int i=0;i<input.length;i++){
-			//pick a random location to put it in 
-			int rand=(int)(Math.random()*(input.length-1));
-			Object temp=input[rand];
-			input[rand]=input[i];
-			input[i]=temp;
+	public static void shuffle(double[][] toShuffle, double[] dependent){
+		for(int i=0;i<toShuffle.length;i++){
+			//pick a random new index to place each value 
+			int rand=(int)(Math.random()*(toShuffle.length-1));
+			swap(toShuffle, rand, i);
+			swap(dependent, rand, i);
 		}
-
 	}
+	
+	private static void swap(double[] arr, int idxA, int idxB){
+		double temp=arr[idxA];
+		//swap
+		arr[idxA]=arr[idxB];
+		arr[idxB]=temp;
+	}
+	
+	private static void swap(double[][] arr, int idxA, int idxB){
+		double[] temp=arr[idxA];
+		//swap
+		arr[idxA]=arr[idxB];
+		arr[idxB]=temp;
+	}
+
 
 	public static double sigmoid(double x) {
 		return 1/(1+Math.pow(Math.E, -x));
